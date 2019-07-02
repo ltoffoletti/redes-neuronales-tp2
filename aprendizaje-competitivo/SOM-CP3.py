@@ -40,7 +40,7 @@ def most_common(lst, n):
   if len(lst) == 0: return -1
   count = np.zeros(shape=n, dtype=np.int)
   for i in range(len(lst)):
-    count[lst[i]] += 1
+    count[int(lst[i])] += 1
   return np.argmax(count)
 
 def standarize_data(input_data):
@@ -54,23 +54,24 @@ def standarize_data(input_data):
 #########################################################################################################
 
 def main():  
-    dim = 3
-    rows = 15; cols = 15
+    dim = 9
+    rows = 10; cols = 10
     range_max = rows + cols   # Distancia maxima de manhatan
-    learn_rate = 0.5          # Tasa de aprendizaje inicial y máxima
-    epoch = 7000
+    learn_rate = 0.5        # Tasa de aprendizaje inicial y máxima
+    epoch = 15000
 
     # Lectura de datos
 
-    data_file = np.load('CP3.npy')
-    docu_file = data_file[:,:3]
-    categoria = data_file[:,3]
+    nombre = 'CP9.npy'
+    data_file = np.load(nombre)
+    docu_file = data_file[:,:dim]
+    categoria = data_file[:,dim]
 
     for i in range(len(categoria)):
         categoria[i] = int(categoria[i])
     
     # Normalización en caso de ser necesario
-    #docu_entrada = standarize_data(np.array(docu_entrada))
+    #docu_file = standarize_data(np.array(docu_file))
     
     #########################################################################################################
     
@@ -82,7 +83,7 @@ def main():
     docu_file = np.array([docu_todo[i][0] for i in range(len(docu_todo))])
     categoria = np.array([docu_todo[i][1] for i in range(len(docu_todo))])
 
-    n_train = 600
+    n_train = 750
 
     docu_val = docu_file[n_train:]
     categoria_val = categoria[n_train:]

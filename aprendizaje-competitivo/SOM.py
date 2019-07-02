@@ -52,10 +52,10 @@ def standarize_data(input_data):
 
 
 #########################################################################################################
+
 def main():  
-    np.random.seed(1)
-    dim = 850    
-    rows = 20; cols = 20
+    dim = 850
+    rows = 15; cols = 15
     range_max = rows + cols   # Distancia maxima de manhatan
     learn_rate = 0.5          # Tasa de aprendizaje inicial y máxima
     epoch = 7000
@@ -76,14 +76,20 @@ def main():
     #########################################################################################################
     
     # Seleccionar datos de entrenamiento 
-    porciento_train = 0.8
-    train = random.choice(list(range(len(docu_file))))     
-    train_set_size = int(train* porciento_train)
-    print (train,train_set_size,len(docu_file))
 
-    docu_entrada = docu_file[0:train_set_size] 
+    docu_todo = list(zip(docu_file,categoria))
+    np.random.shuffle(docu_todo)
 
+    docu_file = np.array([docu_todo[i][0] for i in range(len(docu_todo))])
+    categoria = np.array([docu_todo[i][1] for i in range(len(docu_todo))])
 
+    n_train = 600
+
+    docu_val = docu_file[n_train:]
+    categoria_val = categoria[n_train:]
+
+    docu_entrada = docu_file[:n_train]
+    categoria = categoria[:n_train]
     ##########################################################################################################
 
     # SOM INIT
@@ -94,7 +100,7 @@ def main():
     for paso in range(epoch):
         if paso % (epoch/10) == 0: print("step = ", str(paso))
         pct_left = 1.0 - ((paso * 1.0) / epoch)                                # Porcenraje de iteracion restante
-        curr_range = (int)(pct_left * range_max)                               # maxiam distancia de manhatan en la que el "paso" decide "cerrar"
+        curr_range = int(pct_left * range_max)                               # maxiam distancia de manhatan en la que el "paso" decide "cerrar"
         #print (curr_range) 
         learn_rate_update = pct_left * learn_rate
         #print (learn_rate_update)
@@ -142,80 +148,9 @@ def main():
     #plt.imshow(SOM_map[:,:,0], cmap=plt.cm.get_cmap('terrain_r'))                                     
     plt.imshow(categoria_map, cmap=plt.cm.get_cmap('terrain_r'))
     plt.colorbar()
-    plt.show()   
+    plt.show()                                  
 
-"""               
-######################################################################################################################################################################                 
-    ### modelo equivalente que utilice como entrada los datos proyectados en las primeras 3 componentes principales 
 
-    dim = 9
-    rows = 30; cols = 30
-    range_max = rows + cols   # Distancia maxima de manhatan
-    learn_rate = 0.5          # Tasa de aprendizaje inicial y máxima
-    epoch = 5000
-
-    # SOM INIT 
-
-    # create SOM
-    SOM_map = SOM_map[:,:,0:dim].reshape(30*30,dim)
-    SOM_map_component = np.random.random_sample(size=(rows,cols,dim))                    # Instancia inicial del mapa SOM 
-    
-    for paso in range(epoch):
-        if paso % (epoch/10) == 0: print("step = ", str(paso))
-        pct_left = 1.0 - ((paso * 1.0) / epoch)                                # Porcenraje de iteracion restante
-        curr_range = (int)(pct_left * range_max)                               # maxiam distancia de manhatan en la que el "paso" decide "cerrar"
-        #print (curr_range) 
-        learn_rate_update = pct_left * learn_rate
-        #print (learn_rate_update)
-        
-        #print (SOM_map.shape)
-        
-
-        pattern = np.random.randint(len(SOM_map))                                    # seleccionamos aleatoriamente un patron en datos de entrada
-        #print (pattern,len(docu_entrada))
-        (bmu_row, bmu_col) = MUC(SOM_map, pattern, SOM_map_component, rows, cols)    #determina el nodo en unidad de mapa que mejor coincida 
-        
-
-        # Examinamos cada nodo en SOM 
-        for i in range(rows):
-            for j in range(cols):
-                # si dicho nodo está cerca de MUC: actualizamos el nodo del vector actual  
-                if manhattan_dist(bmu_row, bmu_col, i, j)  < curr_range:    # verificamos si la distancia de manhatan desde MUC es menor que max dist de manhatan
-                    SOM_map_component[i][j] = SOM_map_component[i][j] + learn_rate_update * (SOM_map[pattern] - SOM_map_component[i][j]) 
-                
-                #else:
-                #    SOM_map[i][j] = SOM_map[i][j] - learn_rate_update * (docu_entrada[pattern] - SOM_map[i][j]) 
-         
-        #print("Se ha completado el mapa SOM \n") 
-        # La actualización acerca el vector del nodo actual al patron de datos utilizando 
-        # el valor de learn_rate_update que disminuye lentamente con el tiempo.
-        
-    #print (SOM_map.shape)
-     
-    # Reducción de dimensionalidad: Arreglos de dos dimensiones 
-    # Asociar cada nodo a la categoría a que pertenece
-
-    print("Asociando cada nodo a su categoría")
-    SOM_mapping2d = np.empty(shape=(rows,cols), dtype=object)                # mapa SOM de dos dimensiones
-    for i in range(rows):
-        for j in range(cols):
-            SOM_mapping2d[i][j] = []
-    for line in range(len(docu_entrada)):
-        (m_row, m_col) = MUC(SOM_map, line, SOM_map_component, rows, cols)
-        SOM_mapping2d[m_row][m_col].append(categoria[line])
-    
-    # SOM_mapping2d sería nuestro mapa en dos dimensiones    
-    categoria_map = np.zeros(shape=(rows,cols), dtype=np.int)
-    for i in range(rows):
-        for j in range(cols):
-            categoria_map[i][j] = most_common(SOM_mapping2d[i][j], 10)
-                                         
-    plt.imshow(categoria_map, cmap=plt.cm.get_cmap('terrain_r'))
-    plt.colorbar()
-    plt.show() 
-
-"""                                     
-      
 if __name__=="__main__":
   main()   
 
