@@ -148,7 +148,7 @@ class ClaseSOM(object):
                 categoria_map[i][j] = self.most_common(SOM_mapping2d[i][j], 10)
 
         # Validacion
-        print("Asociando cada nodo a su categoría")
+        print("Calculando validacion")
         SOM_mapping2d_validacion = np.empty(shape=(self.rows, self.cols), dtype=object)  # mapa SOM de dos dimensiones
         for i in range(self.rows):
             for j in range(self.cols):
@@ -157,18 +157,21 @@ class ClaseSOM(object):
             (m_row, m_col) = self.MUC(self.docu_entrada, line, SOM_map, self.rows, self.cols)
             SOM_mapping2d_validacion[m_row][m_col].append(self.categoria_validacion[line])
         clasificaciones_ok = 0
-        # SOM_mapping2d sería nuestro mapa en dos dimensiones
+        # SOM_mapping2d  de validacion
         categoria_map_validacion = np.zeros(shape=(self.rows, self.cols), dtype=np.int)
         for i in range(self.rows):
             for j in range(self.cols):
                 categoria_map_validacion[i][j] = self.most_common(SOM_mapping2d_validacion[i][j], 10)
                 if categoria_map[i][j] == categoria_map_validacion[i][j]:
-                    clasificaciones_ok+=1
+                    clasificaciones_ok += 1
 
-        print("Clasificaciones OK: {0}".format(clasificaciones_ok))
+        print("Clasificaciones OK: {0} sobre {1}, efectividad: {2}%".format(clasificaciones_ok,
+                                                                           len(self.docu_validacion),
+                                                                            round(clasificaciones_ok*100/len(self.docu_validacion),2)))
+
+        # Imprime el mapa y la validacion
 
         fig = plt.figure()
-
         plt.subplot(2,1,1)
         plt.imshow(categoria_map, cmap=plt.cm.get_cmap('terrain_r'))
         plt.colorbar()
