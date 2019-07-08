@@ -124,6 +124,7 @@ class RunnerTP2(object):
         self.L_out = data['L_out']
         #TODO agregar L_in??
 
+
     def datos_red(self):
         print("W_tolerance: {0}, learning_rate: {1} \n"
               "PCS: {2} \n"
@@ -135,7 +136,7 @@ class RunnerTP2(object):
 
 # Auxiliares
 
-import glob
+import glob, re
 
 def opcion_entrenar():
     learning_rate = 0
@@ -222,7 +223,7 @@ def opcion_cargar_som():
         nro_dir = -1
         while nro_dir <= -1 or nro_dir > len(dirs):
             nro_dir = int(input("Elija nro de directorio 0 a {0}: ".format(len(dirs) - 1)))
-        dim = int(dirs[nro_dir][10])
+        dim = int(re.search('input_som/(.*)pcs', dirs[nro_dir]).group(1))
         print("Se eligio directorio con {0} componentes".format(dim))
         archivos = (glob.glob(dirs[nro_dir] + "/*.npy"))
         if len(archivos) == 0:
