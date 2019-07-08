@@ -182,12 +182,12 @@ def opcion_cargar():
 
 def init_som(filename, dim):
     opcion = 0
-    print("Valores por defecto: mapa de 10x10, 0.5 learning rate y 10000 epochs.")
+    print("Valores por defecto: mapa de 10x10, 0.5 learning rate y 15000 epochs.")
     while opcion <= 0 or opcion > 2:
         opcion = int(input("\n 1-Entrenar por defecto\n 2-Ingresar parametros \n Seleccione opcion: "))
     if opcion == 1:
         learning_rate = 0.5
-        epochs = 10000
+        epochs = 15000
         rows = 10
         cols = 10
     else:
