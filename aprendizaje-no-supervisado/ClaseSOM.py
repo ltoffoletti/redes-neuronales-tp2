@@ -154,7 +154,7 @@ class ClaseSOM(object):
             for j in range(self.cols):
                 SOM_mapping2d_validacion[i][j] = []
         for line in range(len(self.docu_validacion)):
-            (m_row, m_col) = self.MUC(self.docu_entrada, line, SOM_map, self.rows, self.cols)
+            (m_row, m_col) = self.MUC(self.docu_validacion, line, SOM_map, self.rows, self.cols)
             SOM_mapping2d_validacion[m_row][m_col].append(self.categoria_validacion[line])
         clasificaciones_ok = 0
         # SOM_mapping2d  de validacion
@@ -162,8 +162,12 @@ class ClaseSOM(object):
         for i in range(self.rows):
             for j in range(self.cols):
                 categoria_map_validacion[i][j] = self.most_common(SOM_mapping2d_validacion[i][j], 10)
-                if categoria_map[i][j] == categoria_map_validacion[i][j]:
-                    clasificaciones_ok += 1
+                for value in (SOM_mapping2d_validacion[i][j]):
+                    if value == categoria_map[i][j]:
+                        clasificaciones_ok += 1
+
+        # if categoria_map[i][j] == categoria_map_validacion[i][j] and categoria_map_validacion[i][j]!=-1:
+        #     clasificaciones_ok += 1
 
         print("Clasificaciones OK: {0} sobre {1}, efectividad: {2}%".format(clasificaciones_ok,
                                                                            len(self.docu_validacion),
