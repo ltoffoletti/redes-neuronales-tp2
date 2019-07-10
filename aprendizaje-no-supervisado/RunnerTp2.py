@@ -6,22 +6,24 @@ import numpy as np
 from mpl_toolkits.mplot3d import axes3d
 ###################################################################################
 class RunnerTP2(object):
-    def __init__(self, l_rate=0.02, w_tolerance=0.0001, w_init=50, OjaSanger=1, principal_components=3):
+    def __init__(self, filename='data/tp2_training_dataset.csv', l_rate=0.02, w_tolerance=0.0001, w_init=50, OjaSanger=1, principal_components=3, n_train=750):
         # Numero de componentes principales a extraer
         self.pcs = principal_components;
 
         # Variables de entrenamiento
+        self.filename = filename
         self.l_rate = l_rate
         self.w_tolerance = w_tolerance
         self.w_init = w_init
         self.OjaSanger = OjaSanger  # 0 para Oja, 1 para Sanger
         self.weights = []
         self.salida = []
+        self.n_train = n_train
 
     # Entrena y guarda los datos
-    def train(self, filename='data/tp2_training_dataset.csv'):
+    def train(self):
         # Abro el archivo
-        with open(os.path.dirname(os.path.abspath(__file__)) + '/' + str(filename), 'r') as F:
+        with open(os.path.dirname(os.path.abspath(__file__)) + '/' + str(self.filename), 'r') as F:
             L = F.readlines()
             L_out = []
             L_in = []
@@ -37,7 +39,7 @@ class RunnerTP2(object):
         self.L_out = L_out
         # Inicializo la red y la entreno
         ros = redOjaSanger(verbose=7)
-        W = ros.OjaSanger(self.pcs, L_in, n_train=self.l_rate, w_tolerance=self.w_tolerance,
+        W = ros.OjaSanger(self.pcs, L_in[:750], n_train=self.l_rate, w_tolerance=self.w_tolerance,
                           w_init=self.w_init, OjaSanger=self.OjaSanger)
         self.weights = W
 
@@ -46,6 +48,10 @@ class RunnerTP2(object):
         for i in L_in:
             salida.append(np.dot(W, i))
         self.salida = salida
+
+
+
+
         self.save_results()
 
     def plot(self):
@@ -71,14 +77,28 @@ class RunnerTP2(object):
             xdata = []
             ydata = []
             zdata = []
-            for i in self.salida:
+            for i in self.salida[:self.n_train]:
                 xdata.append(i[0])
                 ydata.append(i[1])
                 zdata.append(i[2])
 
             ax = plt.axes(projection='3d')
-            ax.scatter3D(xdata, ydata, zdata, c=clist, cmap=cmap)
+            ax.scatter3D(xdata, ydata, zdata, c=clist[:self.n_train], cmap=cmap)
             plt.show()
+
+            # Paso los resultados a tres listas de dimensiones
+            xdata = []
+            ydata = []
+            zdata = []
+            for i in self.salida[self.n_train:]:
+                xdata.append(i[0])
+                ydata.append(i[1])
+                zdata.append(i[2])
+
+            ax = plt.axes(projection='3d')
+            ax.scatter3D(xdata, ydata, zdata, c=clist[self.n_train:], cmap=cmap)
+            plt.show()
+
         else:
             print("Para graficar se requieren 3 componentes principales, la red actual posee: {0}".format(self.pcs))
 
@@ -93,7 +113,7 @@ class RunnerTP2(object):
                    ".npz"
         np.savez(dir_redes+filename, w_tolerance=self.w_tolerance, l_rate=self.l_rate,
                  OjaSanger=self.OjaSanger, w_init=self.w_init,
-                 salida=self.salida, weights=self.weights, pcs=self.pcs, L_out=self.L_out)
+                 salida=self.salida, weights=self.weights, pcs=self.pcs, L_out=self.L_out, n_train=self.n_train)
 
         R = np.zeros(shape=(900, self.pcs + 1))
         for i in range(len(self.salida)):
@@ -110,7 +130,7 @@ class RunnerTP2(object):
             print("Creation of the directory %s failed" % dir_input_som)
         else:
             print("Successfully created the directory %s " % dir_input_som)
-        np.save(dir_input_som + 'CP-' + filename + str(self.pcs), R)
+        np.save(dir_input_som + 'CP-' + filename, R)
 
     def load_network(self, filename):
         data = np.load(filename)
@@ -122,6 +142,7 @@ class RunnerTP2(object):
         self.weights = data['weights']
         self.salida = data['salida']
         self.L_out = data['L_out']
+        self.n_train = data['n_train']
         #TODO agregar L_in??
 
 
@@ -139,6 +160,17 @@ class RunnerTP2(object):
 import glob, re
 
 def opcion_entrenar():
+    archivos = (glob.glob("data/*.csv"))
+    if len(archivos) == 0:
+        print("No hay archivos para cargar.")
+    else:
+        for index, file in enumerate(archivos):
+            print("{0} - {1}".format(index, file))
+        nro_archivo = -1
+        while nro_archivo <= -1 or nro_archivo > len(archivos):
+            nro_archivo = int(input("Elija nro de archivo 0 a {0}: ".format(len(archivos) - 1)))
+    filename = archivos[nro_archivo]
+
     learning_rate = 0
     while learning_rate <= 0:
         learning_rate = float(input("Ingrese learning rate (0.01): "))
@@ -160,7 +192,7 @@ def opcion_entrenar():
         pcs = int(input("Ingrese Nro de componentes principales a extraer (3): "))
     print("pcs: {0}".format(pcs))
 
-    net = RunnerTP2(learning_rate, w_tolerance, w_init, OjaSanger, pcs)
+    net = RunnerTP2(filename, learning_rate, w_tolerance, w_init, OjaSanger, pcs)
     net.train()
     return net
 
