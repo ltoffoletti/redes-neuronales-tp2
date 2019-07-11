@@ -81,8 +81,9 @@ class RunnerTP2(object):
                 xdata.append(i[0])
                 ydata.append(i[1])
                 zdata.append(i[2])
-
+            fig = plt.figure()
             ax = plt.axes(projection='3d')
+            fig.suptitle('Entrenamiento', fontsize=16)
             ax.scatter3D(xdata, ydata, zdata, c=clist[:self.n_train], cmap=cmap)
             plt.show()
 
@@ -95,7 +96,9 @@ class RunnerTP2(object):
                 ydata.append(i[1])
                 zdata.append(i[2])
 
+            fig = plt.figure()
             ax = plt.axes(projection='3d')
+            fig.suptitle('Validacion', fontsize=16)
             ax.scatter3D(xdata, ydata, zdata, c=clist[self.n_train:], cmap=cmap)
             plt.show()
 
@@ -277,7 +280,7 @@ while not salir:
     opcion = 0
     while opcion <= 0 or opcion > 6:
         opcion = int(input("\n 1-Entrenar\n 2-Cargar red desde archivo + Plot\n 3-Plot + "
-                           "datos red actual \n 4-Entrenar con opciones por default \n 5-Correr SOM \n 6-Salir \n Seleccione opcion: "))
+                           "datos red actual \n 4-Entrenar con opciones por default \n 5-Generar SOM \n 6-Salir \n Seleccione opcion: "))
     if opcion == 1:
         net = opcion_entrenar()
     elif opcion == 2:

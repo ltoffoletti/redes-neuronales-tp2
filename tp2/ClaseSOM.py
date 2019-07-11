@@ -18,7 +18,6 @@ class ClaseSOM(object):
 
         # Lectura de datos
 
-        # nombre = 'CP3.npy'
         data_file = np.load(filename)
         docu_file = data_file[:, :self.dim]
         categoria = data_file[:, self.dim]
@@ -40,9 +39,6 @@ class ClaseSOM(object):
         categoria = np.array([docu_todo[i][1] for i in range(len(docu_todo))])
 
         n_train = 750
-
-        docu_val = docu_file[n_train:]
-        categoria_val = categoria[n_train:]
 
         self.docu_entrada = docu_file[:n_train]
         self.categoria = categoria[:n_train]
@@ -75,7 +71,7 @@ class ClaseSOM(object):
     ## Devuelve el valor más común o que más se repite de una lista de valores :
     def most_common(self, lst, n):
         # lst es la lista de valores 0 . . n
-        if len(lst) == 0: return -1
+        if len(lst) == 0: return 0
         count = np.zeros(shape=n, dtype=np.int)
         for i in range(len(lst)):
             count[int(lst[i])] += 1
@@ -91,8 +87,6 @@ class ClaseSOM(object):
 
 
     #########################################################################################################
-    # TODO agregar un metrica de las diferencias - no me acuerdo cual era
-    # TODO y se puede poner una letra dentro del cuadrante
     def create_map(self):
         # SOM INIT
 
@@ -166,22 +160,21 @@ class ClaseSOM(object):
                     if value == categoria_map[i][j]:
                         clasificaciones_ok += 1
 
-        # if categoria_map[i][j] == categoria_map_validacion[i][j] and categoria_map_validacion[i][j]!=-1:
-        #     clasificaciones_ok += 1
-
         print("Clasificaciones OK: {0} sobre {1}, efectividad: {2}%".format(clasificaciones_ok,
                                                                            len(self.docu_validacion),
                                                                             round(clasificaciones_ok*100/len(self.docu_validacion),2)))
 
         # Imprime el mapa y la validacion
 
-        fig = plt.figure()
-        plt.subplot(2,1,1)
-        plt.imshow(categoria_map, cmap=plt.cm.get_cmap('terrain_r'))
-        plt.colorbar()
-        plt.subplot(2, 1, 2)
-        plt.imshow(categoria_map_validacion, cmap=plt.cm.get_cmap('terrain_r'))
-        plt.colorbar()
+        fig, axs = plt.subplots(2, 1, constrained_layout=True)
+        fig.suptitle('Self organized map', fontsize=16)
+        cmap = plt.cm.get_cmap('rainbow', 10)
+        cmap.set_under(color='white')
+        axs[0].set_title('Entrenamiento')
+        axs[0].imshow(categoria_map, cmap=cmap, vmin=0.001)
+
+        axs[1].set_title('Validacion')
+        axs[1].imshow(categoria_map_validacion, cmap=cmap, vmin=0.001)
         plt.show()
 
 
