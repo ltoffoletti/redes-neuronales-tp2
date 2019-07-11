@@ -83,7 +83,8 @@ class RunnerTP2(object):
                 zdata.append(i[2])
             fig = plt.figure()
             ax = plt.axes(projection='3d')
-            fig.suptitle('Entrenamiento', fontsize=16)
+
+            fig.suptitle('Entrenamiento \n learning_rate={0}, tolerance={1}'.format(self.l_rate, self.w_tolerance), fontsize=14)
             ax.scatter3D(xdata, ydata, zdata, c=clist[:self.n_train], cmap=cmap)
             plt.show()
 
@@ -98,7 +99,8 @@ class RunnerTP2(object):
 
             fig = plt.figure()
             ax = plt.axes(projection='3d')
-            fig.suptitle('Validacion', fontsize=16)
+            fig.suptitle('Validacion \n learning_rate={0}, tolerance={1}'.format(self.l_rate, self.w_tolerance),
+                         fontsize=14)
             ax.scatter3D(xdata, ydata, zdata, c=clist[self.n_train:], cmap=cmap)
             plt.show()
 
