@@ -178,7 +178,7 @@ class ClaseSOM(object):
         if self.dim == 850:
             dimensiones = "dataset original (850 campos)"
         else:
-            dimensiones = "componentes="+self.dim
+            dimensiones = "componentes={0}".format(self.dim)
         fig.suptitle("Self organized map \n learning rate = {0}, epochs={1}, {2} \n tiempo de entrenamiento={3}secs "
                      "\n efectividad={4}%"
                      .format(self.learn_rate, self.epoch, dimensiones, '%.2f' % (end-start), efectividad), fontsize=12)
