@@ -5,9 +5,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import time
 
 class ClaseSOM(object):
-    def __init__(self, filename, dim=3, rows=10, cols=10, epoch=10000, learn_rate=0.5):
+    def __init__(self, filename, dim=3, rows=10, cols=10, epoch=10000, learn_rate=0.5, full_dataset=False):
         self.dim = dim
         self.rows = rows
         self.cols = cols
@@ -16,11 +17,18 @@ class ClaseSOM(object):
 
         self.range_max = self.rows + self.cols  # Distancia maxima de manhatan
 
-        # Lectura de datos
+        # Lectura de datos, full_dataset entrena con el csv original
 
-        data_file = np.load(filename)
-        docu_file = data_file[:, :self.dim]
-        categoria = data_file[:, self.dim]
+        if full_dataset:
+            data_file = 'data/tp2_training_dataset.csv'
+            docu_file = np.loadtxt(data_file, delimiter=",", usecols=range(1, 851),
+                                   dtype=np.float)
+            categoria = np.loadtxt(data_file, delimiter=",", usecols=[0],
+                                   dtype=np.int)
+        else:
+            data_file = np.load(filename)
+            docu_file = data_file[:, :self.dim]
+            categoria = data_file[:, self.dim]
 
         for i in range(len(categoria)):
             categoria[i] = int(categoria[i])
@@ -89,7 +97,7 @@ class ClaseSOM(object):
     #########################################################################################################
     def create_map(self):
         # SOM INIT
-
+        start = time.time()
         # create SOM
         SOM_map = np.random.random_sample(size=(self.rows, self.cols, self.dim))  # Instancia inicial del mapa SOM
 
@@ -116,7 +124,7 @@ class ClaseSOM(object):
 
                         # else:
                     #    SOM_map[i][j] = SOM_map[i][j] - learn_rate_update * (docu_entrada[pattern] - SOM_map[i][j])
-
+        end = time.time()
             # print("Se ha completado el mapa SOM \n")
             # La actualización acerca el vector del nodo actual al patron de datos utilizando
             # el valor de learn_rate_update que disminuye lentamente con el tiempo.
@@ -159,15 +167,21 @@ class ClaseSOM(object):
                 for value in (SOM_mapping2d_validacion[i][j]):
                     if value == categoria_map[i][j]:
                         clasificaciones_ok += 1
-
+        efectividad = round(clasificaciones_ok*100/len(self.docu_validacion),2)
         print("Clasificaciones OK: {0} sobre {1}, efectividad: {2}%".format(clasificaciones_ok,
                                                                            len(self.docu_validacion),
-                                                                            round(clasificaciones_ok*100/len(self.docu_validacion),2)))
-
+                                                                            efectividad))
+        print("\n Tiempo de entrenamiento: {0}".format(end-start))
         # Imprime el mapa y la validacion
 
         fig, axs = plt.subplots(2, 1, constrained_layout=True)
-        fig.suptitle('Self organized map', fontsize=16)
+        if self.dim == 850:
+            dimensiones = "dataset original (850 campos)"
+        else:
+            dimensiones = "componentes="+self.dim
+        fig.suptitle("Self organized map \n learning rate = {0}, epochs={1}, {2} \n tiempo de entrenamiento={3}secs "
+                     "\n efectividad={4}%"
+                     .format(self.learn_rate, self.epoch, dimensiones, '%.2f' % (end-start), efectividad), fontsize=12)
         cmap = plt.cm.get_cmap('rainbow', 10)
         cmap.set_under(color='white')
         axs[0].set_title('Entrenamiento')

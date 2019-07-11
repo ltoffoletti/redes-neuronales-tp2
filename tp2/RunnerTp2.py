@@ -216,7 +216,7 @@ def opcion_cargar():
         net.plot()
     return net
 
-def init_som(filename, dim):
+def init_som(filename, dim, full_dataset=False):
     opcion = 0
     print("Valores por defecto: mapa de 10x10, 0.5 learning rate y 15000 epochs.")
     while opcion <= 0 or opcion > 2:
@@ -244,34 +244,42 @@ def init_som(filename, dim):
             epochs = int(input("Ingrese nro de epochs a entrenar: "))
         print("Epochs: {0}".format(epochs))
 
-    som = ClaseSOM(filename, dim, rows, cols, epochs, learning_rate)
+    som = ClaseSOM(filename, dim, rows, cols, epochs, learning_rate, full_dataset)
     return som
 
 
 def opcion_cargar_som():
-    dirs = (glob.glob("input_som/*"))
-    if len(dirs) == 0:
-        print("No hay directorios para cargar.")
-    else:
-        for index, file in enumerate(dirs):
-            print("{0} - {1}".format(index, file))
-        nro_dir = -1
-        while nro_dir <= -1 or nro_dir > len(dirs):
-            nro_dir = int(input("Elija nro de directorio 0 a {0}: ".format(len(dirs) - 1)))
-        dim = int(re.search('input_som/(.*)pcs', dirs[nro_dir]).group(1))
-        print("Se eligio directorio con {0} componentes".format(dim))
-        archivos = (glob.glob(dirs[nro_dir] + "/*.npy"))
-        if len(archivos) == 0:
-            print("No hay archivos para cargar.")
+    opt = -1
+    while opt <= 0 or opt > 2:
+        opt = int(input("\n 1-Entrenar con dataset original (850 campos) \n 2-Entrenar con dataset reducido (Componentes Principales):"))
+    if opt == 2:
+        dirs = (glob.glob("input_som/*"))
+        if len(dirs) == 0:
+            print("No hay directorios para cargar.")
         else:
-            for index, file in enumerate(archivos):
+            for index, file in enumerate(dirs):
                 print("{0} - {1}".format(index, file))
-            nro_archivo = -1
-            while nro_archivo <= -1 or nro_archivo > len(archivos):
-                nro_archivo = int(input("Elija nro de archivo 0 a {0}: ".format(len(archivos) - 1)))
+            nro_dir = -1
+            while nro_dir <= -1 or nro_dir > len(dirs):
+                nro_dir = int(input("Elija nro de directorio 0 a {0}: ".format(len(dirs) - 1)))
+            dim = int(re.search('input_som/(.*)pcs', dirs[nro_dir]).group(1))
+            print("Se eligio directorio con {0} componentes".format(dim))
+            archivos = (glob.glob(dirs[nro_dir] + "/*.npy"))
+            if len(archivos) == 0:
+                print("No hay archivos para cargar.")
+            else:
+                for index, file in enumerate(archivos):
+                    print("{0} - {1}".format(index, file))
+                nro_archivo = -1
+                while nro_archivo <= -1 or nro_archivo > len(archivos):
+                    nro_archivo = int(input("Elija nro de archivo 0 a {0}: ".format(len(archivos) - 1)))
 
-            som = init_som(archivos[nro_archivo], dim)
-            som.create_map()
+                som = init_som(archivos[nro_archivo], dim)
+                som.create_map()
+    else:
+        #Entrena con dataset sin reducir
+        som = init_som(None, 850, True)
+        som.create_map()
 
 # MAIN
 
